@@ -44,6 +44,9 @@ class Settings(BaseSettings):
     jwt_secret: str = _INSECURE_JWT_DEFAULT
     jwt_expire_hours: int = 720  # 30 days
     alpha_emails: str = ""  # comma-separated emails that skip the password step
+    # Open alpha: when true, ANY email can log in without a password (accounts
+    # auto-created on first login). Set to false to enforce the allowlist only.
+    open_signup: bool = True
     # Set to 1/true only for local dev to allow the insecure default JWT secret.
     allow_insecure_jwt: bool = False
 

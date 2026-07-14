@@ -1,9 +1,10 @@
-"""Authentication: email-first login with an alpha allowlist.
+"""Authentication: email-first login.
 
-- Alpha-allowlisted emails (settings.alpha_emails) skip the password step and
-  are auto-created on first login.
-- Other emails must already exist and match their password (login only; no
-  self sign-up).
+- Open-signup mode (settings.open_signup, on during alpha): ANY email logs in
+  without a password; the account is auto-created on first login.
+- Otherwise, only allowlisted emails (settings.alpha_emails) skip the password
+  step; all others must already exist and match their password.
+- A user who has a password set always uses the password path.
 """
 from __future__ import annotations
 
@@ -27,25 +28,36 @@ class AuthService:
         ).scalar_one_or_none()
 
     @staticmethod
-    def _is_alpha(email: str) -> bool:
-        return email.strip().lower() in settings.alpha_email_set
+    def _passwordless_ok(email: str) -> bool:
+        """True if this email may log in without a password."""
+        return settings.open_signup or email.strip().lower() in settings.alpha_email_set
 
     # ── email-first step ─────────────────────────────────────────────────
     def check_email(self, email: str) -> str:
-        """Return the login mode: 'alpha' | 'password' | 'unknown'."""
-        if self._is_alpha(email):
-            return "alpha"
+        """Return the login mode: 'alpha' | 'password' | 'unknown'.
+
+        A user who already has a password always gets the password path.
+        """
         user = self._find(email)
         if user and user.password_hash:
             return "password"
+        if self._passwordless_ok(email):
+            return "alpha"
         return "unknown"
 
     # ── login ────────────────────────────────────────────────────────────
     def login(self, email: str, password: str | None) -> tuple[str, User]:
         email_norm = email.strip().lower()
+        user = self._find(email_norm)
 
-        if self._is_alpha(email_norm):
-            user = self._find(email_norm)
+        # Existing password account -> must match.
+        if user and user.password_hash:
+            if not verify_password(password or "", user.password_hash):
+                raise UnauthorizedError("Incorrect email or password.")
+            return create_access_token(str(user.id)), user
+
+        # Passwordless path (open signup or allowlist): log in, auto-create.
+        if self._passwordless_ok(email_norm):
             if user is None:
                 user = User(
                     email=email_norm,
@@ -57,11 +69,7 @@ class AuthService:
                 self.db.refresh(user)
             return create_access_token(str(user.id)), user
 
-        # Password path: user must exist and match.
-        user = self._find(email_norm)
-        if user is None or not verify_password(password or "", user.password_hash):
-            raise UnauthorizedError("Incorrect email or password.")
-        return create_access_token(str(user.id)), user
+        raise UnauthorizedError("Incorrect email or password.")
 
     # ── token -> user ────────────────────────────────────────────────────
     def user_from_token(self, token: str) -> User:
