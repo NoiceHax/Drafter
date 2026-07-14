@@ -220,7 +220,7 @@ export interface User {
 }
 
 export interface EmailCheckResponse {
-  mode: "alpha" | "password" | "unknown";
+  mode: "alpha" | "password" | "signup";
 }
 
 export interface AuthResponse {

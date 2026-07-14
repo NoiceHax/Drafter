@@ -9,7 +9,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 
-type Step = "email" | "password" | "alpha";
+type Step = "email" | "password" | "signup" | "alpha";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -34,10 +34,7 @@ export default function LoginPage() {
       const { mode } = await api.checkEmail(email.trim());
       if (mode === "alpha") setStep("alpha");
       else if (mode === "password") setStep("password");
-      else
-        setError(
-          "That email isn't on the list yet. Drafter is invite-only during alpha."
-        );
+      else setStep("signup"); // new email -> create a password
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Something went wrong.");
     } finally {
@@ -157,6 +154,55 @@ export default function LoginPage() {
             </form>
           )}
 
+          {step === "signup" && (
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                doLogin(true);
+              }}
+              className="space-y-4"
+            >
+              <button
+                type="button"
+                onClick={back}
+                className="inline-flex items-center gap-1 text-[11px] text-muted hover:text-text"
+              >
+                <ArrowLeft className="h-3 w-3" />
+                {email}
+              </button>
+              <div>
+                <h1 className="serif text-lg font-semibold text-text">
+                  Create your account
+                </h1>
+                <p className="mt-1 text-xs text-muted">
+                  New here. Choose a password to finish signing up.
+                </p>
+              </div>
+              <div>
+                <Label>Create a password</Label>
+                <Input
+                  type="password"
+                  autoFocus
+                  required
+                  minLength={8}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="At least 8 characters"
+                />
+              </div>
+              {error && <p className="text-xs leading-relaxed text-danger">{error}</p>}
+              <Button
+                type="submit"
+                variant="primary"
+                loading={loading}
+                className="w-full justify-center"
+              >
+                Create account
+                {!loading && <ArrowRight className="h-4 w-4" />}
+              </Button>
+            </form>
+          )}
+
           {step === "alpha" && (
             <div className="space-y-4">
               <button
@@ -188,7 +234,7 @@ export default function LoginPage() {
         </div>
 
         <p className="mt-6 text-center text-[11px] text-muted">
-          Drafter is invite-only during alpha.
+          New email signs up, returning email signs in.
         </p>
       </div>
     </div>
