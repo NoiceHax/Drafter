@@ -4,7 +4,6 @@ import * as React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { KeyRound, Check, ExternalLink } from "lucide-react";
 import { api } from "@/lib/api";
-import { API_URL } from "@/lib/api";
 import { useToast } from "@/components/ui/toast";
 import { PageHeader } from "@/components/page-header";
 import { Card } from "@/components/ui/card";
@@ -80,6 +79,7 @@ export default function SettingsPage() {
             getUrl="https://build.nvidia.com"
             getLabel="Get a key at build.nvidia.com"
             isSet={status?.nvidia_api_key_set}
+            required
             value={nvidiaKey}
             onChange={setNvidiaKey}
             onClear={() => clearKey("nvidia_api_key")}
@@ -112,6 +112,7 @@ export default function SettingsPage() {
             getUrl="https://app.tavily.com/home"
             getLabel="Get a key at tavily.com"
             isSet={status?.tavily_api_key_set}
+            required
             value={tavilyKey}
             onChange={setTavilyKey}
             onClear={() => clearKey("tavily_api_key")}
@@ -124,6 +125,7 @@ export default function SettingsPage() {
             getUrl="https://www.pexels.com/api/new/"
             getLabel="Get a key at pexels.com/api"
             isSet={status?.pexels_api_key_set}
+            required
             value={pexelsKey}
             onChange={setPexelsKey}
             onClear={() => clearKey("pexels_api_key")}
@@ -136,13 +138,6 @@ export default function SettingsPage() {
             </Button>
           </div>
         </Card>
-
-        <Card className="p-4">
-          <h2 className="label mb-1 text-xs text-text">API endpoint</h2>
-          <code className="block rounded border border-border bg-bg px-3 py-2 font-mono text-xs tabular-nums text-subtle">
-            {API_URL}
-          </code>
-        </Card>
       </div>
     </div>
   );
@@ -154,6 +149,7 @@ function KeyField({
   getUrl,
   getLabel,
   isSet,
+  required,
   value,
   onChange,
   onClear,
@@ -164,6 +160,7 @@ function KeyField({
   getUrl?: string;
   getLabel?: string;
   isSet?: boolean;
+  required?: boolean;
   value: string;
   onChange: (v: string) => void;
   onClear: () => void;
@@ -173,12 +170,16 @@ function KeyField({
     <div>
       <div className="flex items-center justify-between">
         <Label>{label}</Label>
-        {isSet && (
+        {isSet ? (
           <span className="label inline-flex items-center gap-1 text-[9px] text-success">
             <Check className="h-3 w-3" />
             Set
           </span>
-        )}
+        ) : required ? (
+          <span className="label inline-flex items-center gap-1 rounded-sm bg-accent/15 px-1.5 py-0.5 text-[9px] text-accent">
+            Required
+          </span>
+        ) : null}
       </div>
       <Input
         type="password"
