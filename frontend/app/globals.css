@@ -1,0 +1,175 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Body: a clean, readable humanist sans for dense UI. */
+  --font-sans: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", sans-serif;
+  /* Display: an editorial serif - the manuscript / screenplay voice. */
+  --font-display: "Iowan Old Style", "Palatino Linotype", "Palatino", "Georgia",
+    "Times New Roman", serif;
+  /* Mono: timecodes, scene numbers, queries, scores. */
+  --font-mono: ui-monospace, "Cascadia Code", "SF Mono", "JetBrains Mono", "Consolas", monospace;
+}
+
+* {
+  border-color: theme("colors.border");
+}
+
+html,
+body {
+  background-color: theme("colors.bg");
+  color: theme("colors.text");
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Faint warm paper grain over the whole workspace - an archival ground,
+   not a flat IDE field. Fixed so it doesn't scroll. */
+body {
+  font-size: 14px;
+  line-height: 1.5;
+  position: relative;
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.5;
+  background-image: radial-gradient(
+    circle at 1px 1px,
+    rgba(239, 231, 216, 0.02) 1px,
+    transparent 0
+  );
+  background-size: 3px 3px;
+}
+
+/* Headings carry the editorial serif and never orphan a single word. */
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  text-wrap: balance;
+  letter-spacing: 0;
+}
+
+/* Uppercase machine labels stay in the sans - small tracked caps read
+   cleaner sans-serif and set the UI voice against the serif headings. */
+.label {
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  letter-spacing: theme("letterSpacing.label");
+  font-weight: 600;
+}
+
+/* Serif display helper for when a heading tag isn't semantically right. */
+.serif {
+  font-family: var(--font-display);
+}
+
+/* Tabular numerics for timecodes, scores, durations, queries. */
+.mono,
+code,
+.tabnum {
+  font-variant-numeric: tabular-nums;
+}
+.tabnum {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Dense scrollbars */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: theme("colors.border");
+  border-radius: 6px;
+  border: 2px solid theme("colors.bg");
+}
+::-webkit-scrollbar-thumb:hover {
+  background: theme("colors.borderStrong");
+}
+
+/* Focus visibility - the tungsten signal. */
+:focus-visible {
+  outline: 2px solid theme("colors.accent.DEFAULT");
+  outline-offset: 1px;
+}
+
+/* Skeleton shimmer */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background-color: theme("colors.elevated");
+}
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.05),
+    transparent
+  );
+  animation: shimmer 1.5s infinite;
+}
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Manuscript margin rule - the faint red vertical line down a ruled page.
+   Used behind the beat-sheet / revision rail. */
+.margin-rule {
+  background-image: linear-gradient(
+    to bottom,
+    theme("colors.accent.muted") 0,
+    theme("colors.accent.muted") 100%
+  );
+  background-size: 1px 100%;
+  background-repeat: no-repeat;
+  background-position: left top;
+}
+
+/* Ruled-paper horizontal lines for empty writing surfaces. */
+.ruled {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 27px,
+    theme("colors.border") 27px,
+    theme("colors.border") 28px
+  );
+}
+
+/* Ensure app chrome sits above the paper grain. */
+#app-root,
+main,
+aside {
+  position: relative;
+  z-index: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  .skeleton::after {
+    animation: none;
+  }
+}

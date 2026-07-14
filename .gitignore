@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+build/
+dist/
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# Tooling / local only
+.claude/
+.plan
+*.log
+
+# Env / secrets (all env files live locally only, never pushed)
+.env
+.env.*
+.env.example
+*.db
+*.sqlite3
+
+# Frontend
+node_modules/
+.next/
+out/
+.turbo/
+next-env.d.ts
+
+# IDE / OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
