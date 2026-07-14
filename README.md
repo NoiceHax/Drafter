@@ -33,6 +33,7 @@ Highlights:
 - [Prerequisites](#prerequisites)
 - [Backend setup](#backend-setup)
 - [Frontend setup](#frontend-setup)
+- [Deployment](#deployment)
 - [Environment variables](#environment-variables)
 - [Provider abstractions](#provider-abstractions)
 - [Database & schema isolation](#database--schema-isolation)
@@ -188,6 +189,36 @@ npm install
 echo "NEXT_PUBLIC_API_URL=http://localhost:8000" > .env.local
 npm run dev                       # http://localhost:3000
 ```
+
+---
+
+## Deployment
+
+The two apps deploy separately (the backend is a persistent Python server, so a
+static host like Cloudflare Pages cannot run it).
+
+### Backend: AWS App Runner
+
+App Runner builds `backend/Dockerfile` and serves it over HTTPS.
+
+1. App Runner -> Create service -> Source: GitHub repo, branch `main`,
+   **Source directory `backend`**, build via the Dockerfile.
+2. Port `8000`.
+3. Set environment variables/secrets (names match `app/core/config.py`):
+   `DATABASE_URL` and `JWT_SECRET` are required (the app refuses to boot without
+   a real `JWT_SECRET`); `FRONTEND_URL` must be your deployed frontend origin(s),
+   comma-separated, for CORS. Optional: `NVIDIA_API_KEY`, `NVIDIA_MODEL`,
+   `TAVILY_API_KEY` + `SEARCH_PROVIDER`, `PEXELS_API_KEY` + `IMAGE_SEARCH_PROVIDER`,
+   `ALPHA_EMAILS`.
+4. Deploy. The container runs `alembic upgrade head` then starts uvicorn. Health
+   check: `GET /health`. (`backend/apprunner.yaml` is also provided as an
+   alternative to the Dockerfile.)
+
+### Frontend: any Node/static host (Vercel, etc.)
+
+Root directory `frontend`, build `npm run build`. Set
+`NEXT_PUBLIC_API_URL` to the App Runner URL. Then set the backend's
+`FRONTEND_URL` to the frontend's deployed origin so CORS allows it.
 
 ---
 

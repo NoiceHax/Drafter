@@ -1,0 +1,19 @@
+# AWS App Runner config for the FastAPI backend.
+# In the App Runner console: Source = this repo, Source directory = backend,
+# and it will use this Dockerfile (or the managed Python runtime below).
+version: 1.0
+runtime: python313
+build:
+  commands:
+    build:
+      - pip install -r requirements.txt
+run:
+  runtime-version: 3.13
+  command: sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"
+  network:
+    port: 8000
+  env:
+    # Set the real values as App Runner service environment variables /
+    # secrets in the console. These names must match app/core/config.py.
+    - name: PORT
+      value: "8000"

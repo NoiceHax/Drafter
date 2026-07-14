@@ -36,6 +36,7 @@ class Settings(BaseSettings):
     unsplash_access_key: str = ""
 
     # App
+    # One or more allowed frontend origins (comma-separated for multiple).
     frontend_url: str = "http://localhost:3000"
     words_per_minute: int = 150
 
@@ -67,6 +68,13 @@ class Settings(BaseSettings):
     @property
     def alpha_email_set(self) -> set[str]:
         return {e.strip().lower() for e in self.alpha_emails.split(",") if e.strip()}
+
+    @property
+    def cors_origins(self) -> list[str]:
+        """Allowed CORS origins: the configured frontend URL(s) plus localhost."""
+        origins = {o.strip() for o in self.frontend_url.split(",") if o.strip()}
+        origins.add("http://localhost:3000")
+        return sorted(origins)
 
     @property
     def sqlalchemy_url(self) -> str:
