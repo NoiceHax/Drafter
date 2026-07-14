@@ -23,8 +23,15 @@ import type {
   UserKeysUpdate,
 } from "@/types";
 
+// Base URL for API calls.
+//   - unset          -> default to local backend (dev convenience)
+//   - "" (empty)     -> same-origin: requests go to "/api/..." on the current
+//                       host, which Vercel rewrites to the backend (see
+//                       vercel.json). This avoids mixed-content + CORS entirely.
+//   - "http://host"  -> call that host directly.
 export const API_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+  process.env.NEXT_PUBLIC_API_URL ??
+  (process.env.NODE_ENV === "production" ? "" : "http://localhost:8000");
 
 export const TOKEN_KEY = "drafter.token";
 
